@@ -8,6 +8,8 @@ TagManager:
   - coin
   - MushRoom
   - Player
+  - Ground
+  - Door
   layers:
   - Default
   - TransparentFX

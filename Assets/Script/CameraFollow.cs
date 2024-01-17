@@ -10,7 +10,7 @@ public class CameraFollow : MonoBehaviour
     public float minX, maxX;
     void Start()
     {
-        player = GameObject.Find("player").transform;
+        player = GameObject.Find("Character").transform;
     }
 
     void Update()

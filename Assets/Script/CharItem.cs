@@ -1,18 +1,40 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 public class CharItem : MonoBehaviour
 {
-    private Vector3 vector3;
-    private Rigidbody2D rb;
-    public float fallSpeed = 10f;
+    public int coin = 0;
+    public TextMeshProUGUI coinText;
 
+    public CharHP charHP;
+    public float currentHP;
+    public float maxHP = 10;
     // Start is called before the first frame update
+
+    public static CharItem instance;
+
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     void Start()
     {
-        vector3 = transform.position;
-        rb = GetComponent<Rigidbody2D>();
+        coinText.SetText(coin.ToString());
+
+        ResestPlayer();
+
     }
 
     // Update is called once per frame
@@ -20,33 +42,64 @@ public class CharItem : MonoBehaviour
     {
         
     }
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("MushRoom")) {
-            
-            Die();
-        }
-        Debug.Log(collision.gameObject.tag); // log ra xem char va chạm vào cái gì
-
-    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "coin")
+        if (collision.CompareTag("coin"))
         {
+            coin++;
+            coinText.SetText(coin.ToString());
             Destroy(collision.gameObject);
-        } 
-    }
-    public void ResetPlayer()
-    {
+        }
+        if (collision.CompareTag("MushRoom"))
+        {
+
+            currentHP = currentHP - 2;
+            charHP.UpdateHP(currentHP, maxHP);
+
+            if(currentHP < 0)
+            {
+
+            }
+
+        }
+        if (collision.CompareTag("Door"))
+        {
+            LoadScence("LV1");
+        }
         
-        transform.position = vector3;
     }
 
-    void Die()
+    private void OnDisable()
     {
-        
-        float RSDelay = 2f;
-        Invoke("ResetPlayer", RSDelay);
-        rb.velocity = new Vector2(0, -fallSpeed);
+        SavePlayer();
+    }
+    public void SavePlayer()
+    {
+        PlayerPrefs.SetInt("PlayerCoin", coin);
+        PlayerPrefs.SetFloat("PlayerHP", currentHP);
+        PlayerPrefs.Save();
+    }
+
+    public void LoadDataPlayer()
+    {
+        coin = PlayerPrefs.GetInt("PlayerCoin",0);
+        currentHP = PlayerPrefs.GetFloat("PlayerHP", maxHP);
+
+        coinText.SetText(coin.ToString());
+        charHP.UpdateHP(currentHP, maxHP);
+    }
+
+    public void LoadScence(string name)
+    {
+        SavePlayer();
+        SceneManager.LoadScene(name);
+    }
+
+
+    public void ResestPlayer()
+    {
+        coin = 0;
+        currentHP = maxHP;
+        charHP.UpdateHP(currentHP, maxHP);
     }
 }
